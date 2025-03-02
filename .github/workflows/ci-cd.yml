@@ -1,57 +1,73 @@
-name: Cypress Amazon Cart Tests
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main  # Executar os testes quando houver push na branch main
+      - main
   pull_request:
     branches:
-      - main  # Executar os testes quando houver um pull request para a branch main
+      - main
 
 jobs:
   run-cypress-tests:
-    runs-on: ubuntu-latest  # Executar em um ambiente Ubuntu
+    runs-on: ubuntu-latest
     steps:
-      # Passo 1: Fazer checkout do repositório
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Passo 2: Configurar o Node.js (versão 18)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Passo 3: Instalar as dependências do projeto (Cypress e outras)
       - name: Install dependencies (Cypress)
-        working-directory: ./CYPRESS-AMAZON-TEST  # Diretório onde está o projeto Cypress
+        working-directory: ./CYPRESS-AMAZON-TEST
         run: npm install
 
-      # Passo 4: Executar os testes Cypress
       - name: Run Cypress tests
-        working-directory: ./CYPRESS-AMAZON-TEST  # Diretório onde está o projeto Cypress
-        uses: cypress-io/github-action@v5  # Ação oficial do Cypress para GitHub Actions
+        working-directory: ./CYPRESS-AMAZON-TEST
+        uses: cypress-io/github-action@v5
         with:
-          browser: chrome  # Navegador a ser utilizado (Chrome)
-          headless: true  # Executar em modo headless (sem interface gráfica)
-          record: true  # Gravar a execução no Cypress Dashboard (opcional)
-          parallel: true  # Executar testes em paralelo (opcional)
-          group: "Cypress Amazon Cart Tests"  # Nome do grupo de testes no Dashboard
+          browser: chrome
+          headless: true
+          record: true
+          parallel: true
+          group: "Cypress Tests"
         env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}  # Chave de gravação do Cypress Dashboard
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
-      # Passo 5: Upload de screenshots em caso de falha
-      - name: Upload test results (screenshots)
+      - name: Upload test results (if needed)
         uses: actions/upload-artifact@v3
-        if: failure()  # Executar apenas se os testes falharem
+        if: failure()
         with:
-          name: cypress-screenshots  # Nome do artefato
-          path: CYPRESS-AMAZON-TEST/cypress/screenshots  # Caminho das screenshots
+          name: cypress-screenshots
+          path: CYPRESS-AMAZON-TEST/cypress/screenshots
 
-      # Passo 6: Upload de vídeos em caso de falha
-      - name: Upload test results (videos)
-        uses: actions/upload-artifact@v3
-        if: failure()  # Executar apenas se os testes falharem
+  run-api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          name: cypress-videos  # Nome do artefato
-          path: CYPRESS-AMAZON-TEST/cypress/videos  # Caminho dos vídeos
+          python-version: 3.9
+
+      - name: Install dependencies (Python)
+        working-directory: ./Test set
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run API tests
+        working-directory: ./Test set
+        run: |
+          pytest tests/test_jsonplaceholder.py -v --html=reports/report.html
+
+      - name: Upload test results (if needed)
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: api-test-results
+          path: Test set/reports/report.html
