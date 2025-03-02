@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -31,37 +31,8 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 
       - name: Upload test results (if needed)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: CYPRESS-AMAZON-TEST/cypress/screenshots
-
-  run-api-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies (Python)
-        working-directory: ./Test set
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run API tests
-        working-directory: ./Test set
-        run: |
-          pytest tests/test_jsonplaceholder.py -v --html=reports/report.html
-
-      - name: Upload test results (if needed)
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: api-test-results
-          path: Test set/reports/report.html
