@@ -22,7 +22,7 @@ jobs:
         run: npm install
       - name: Run Cypress tests
         working-directory: ./CYPRESS-AMAZON-TEST
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v4
         with:
           browser: chrome
           headless: true
